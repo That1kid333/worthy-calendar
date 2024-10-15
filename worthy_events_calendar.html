@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worthy Events - Check Availability</title>
+    <style>
+        @font-face {
+            font-family: 'Modern Serif Eroded';
+            src: url('path/to/modern-serif-eroded.woff2') format('woff2');
+        }
+        @font-face {
+            font-family: 'Volstead';
+            src: url('path/to/volstead.woff2') format('woff2');
+        }
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #f9f9f5;
+            color: #253320;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-family: 'Modern Serif Eroded', serif;
+            text-align: center;
+            color: #253320;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .flourish {
+            font-family: 'Volstead', cursive;
+            font-size: 24px;
+            color: #7365cc; /* Corrected Putty color */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .calendar-container {
+            background-color: #fff;
+            border: 1px solid #cbbba4;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .calendar-header {
+            background-color: #485541;
+            color: #f9f9f5;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .calendar-body {
+            padding: 10px;
+        }
+        .calendar-week-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-week-days div, .calendar-days div {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+        }
+        .calendar-days div {
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        .calendar-days div:hover:not(.empty) {
+            background-color: #cbbba4;
+        }
+        .calendar-days div.selected {
+            background-color: #485541;
+            color: #f9f9f5;
+        }
+        .calendar-days div.today {
+            background-color: #7365cc; /* Corrected Putty color */
+            color: #f9f9f5;
+        }
+        .calendar-days div.empty {
+            background-color: transparent;
+        }
+        select {
+            padding: 5px;
+            border: none;
+            background-color: #253320;
+            color: #f9f9f5;
+            cursor: pointer;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #cbbba4;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #485541;
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #cbbba4;
+            border-radius: 4px;
+            background-color: #f9f9f5;
+        }
+        button {
+            background-color: #485541;
+            color: #f9f9f5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #253320;
+        }
+        .date-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .date-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background-color: #f9f9f5;
+            border: 1px solid #cbbba4;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .date-option.active {
+            background-color: #485541;
+            color: #f9f9f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Worthy Events</h1>
+        <div class="flourish">Check Date Availability</div>
+        <div class="date-options">
+            <div class="date-option active" id="specificDate">Specific Date</div>
+            <div class="date-option" id="approximateDate">Approximate Date</div>
+        </div>
+        <div class="calendar-container" id="calendarContainer">
+            <div class="calendar-header">
+                <select id="monthSelect"></select>
+                <select id="yearSelect"></select>
+            </div>
+            <div class="calendar-body">
+                <div class="calendar-week-days">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="calendar-days"></div>
+            </div>
+        </div>
+        <form id="availabilityForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <div id="specificDateInput">
+                <label for="selectedDate">Selected Date:</label>
+                <input type="text" id="selectedDate" name="selectedDate" readonly>
+            </div>
+            
+            <div id="approximateDateInput" style="display: none;">
+                <label for="approximateDate">Approximate Date:</label>
+                <textarea id="approximateDate" name="approximateDate" rows="3" placeholder="Please describe your approximate date or time frame"></textarea>
+            </div>
+            
+            <button type="submit">Check Availability</button>
+        </form>
+    </div>
+
+    <script>
+        const monthSelect = document.getElementById('monthSelect');
+        const yearSelect = document.getElementById('yearSelect');
+        const calendarDays = document.querySelector('.calendar-days');
+        const selectedDateInput = document.getElementById('selectedDate');
+        const availabilityForm = document.getElementById('availabilityForm');
+        const specificDateOption = document.getElementById('specificDate');
+        const approximateDateOption = document.getElementById('approximateDate');
+        const calendarContainer = document.getElementById('calendarContainer');
+        const specificDateInput = document.getElementById('specificDateInput');
+        const approximateDateInput = document.getElementById('approximateDateInput');
+
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        function populateMonthSelect() {
+            months.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+            monthSelect.value = currentMonth;
+        }
+
+        function populateYearSelect() {
+            const currentYear = new Date().getFullYear();
+            for (let year = currentYear; year <= currentYear + 5; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            }
+            yearSelect.value = currentYear;
+        }
+
+        function getDaysInMonth(month, year) {
+            return new Date(year, month + 1, 0).getDate();
+        }
+
+        function updateCalendar() {
+            calendarDays.innerHTML = '';
+            const daysInMonth = getDaysInMonth(currentMonth, currentYear);
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('empty');
+                calendarDays.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                
+                if (day === currentDate.getDate() && currentMonth === currentDate.getMonth() && currentYear === currentDate.getFullYear()) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.addEventListener('click', () => {
+                    document.querySelectorAll('.calendar-days div').forEach(div => div.classList.remove('selected'));
+                    dayElement.classList.add('selected');
+                    selectedDateInput.value = `${months[currentMonth]} ${day}, ${currentYear}`;
+                });
+
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        monthSelect.addEventListener('change', (e) => {
+            currentMonth = parseInt(e.target.value);
+            updateCalendar();
+        });
+
+        yearSelect.addEventListener('change', (e) => {
+            currentYear = parseInt(e.target.value);
+            updateCalendar();
+        });
+
+        specificDateOption.addEventListener('click', () => {
+            specificDateOption.classList.add('active');
+            approximateDateOption.classList.remove('active');
+            calendarContainer.style.display = 'block';
+            specificDateInput.style.display = 'block';
+            approximateDateInput.style.display = 'none';
+        });
+
+        approximateDateOption.addEventListener('click', () => {
+            approximateDateOption.classList.add('active');
+            specificDateOption.classList.remove('active');
+            calendarContainer.style.display = 'none';
+            specificDateInput.style.display = 'none';
+            approximateDateInput.style.display = 'block';
+        });
+
+        availabilityForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(availabilityForm);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('https://hook.us1.make.com/ww2efdrtkwk2k40b8v9vcjj18kp8ctsx', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    alert('Thank you for your inquiry. We will get back to you soon regarding the availability of your selected date.');
+                    availabilityForm.reset();
+                    document.querySelectorAll('.calendar-days div').forEach(div => div.classList.remove('selected'));
+                } else {
+                    alert('There was an error submitting your request. Please try again later.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('There was an error submitting your request. Please try again later.');
+            }
+        });
+
+        populateMonthSelect();
+        populateYearSelect();
+        updateCalendar();
+    </script>
+</body>
+</html>
